@@ -1,0 +1,106 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    @apply m-0 bg-[#0a0a0a] min-h-screen text-white antialiased;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+
+  #root {
+    @apply min-h-screen;
+  }
+}
+
+@layer components {
+  .card-dark {
+    @apply bg-[#161616] border border-[#2a2a2a] rounded-2xl;
+  }
+
+  .card-dark-strong {
+    @apply bg-[#1a1a1a] border border-[#2e2e2e] rounded-2xl;
+  }
+
+  .btn-lime {
+    @apply bg-lime-400 text-black font-semibold rounded-full px-6 py-2.5
+           transition-all duration-300 hover:bg-lime-300 hover:shadow-[0_0_20px_rgba(163,230,53,0.25)]
+           active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100;
+  }
+
+  .btn-orange {
+    @apply bg-orange-500 text-white font-semibold rounded-full px-6 py-2.5
+           transition-all duration-300 hover:bg-orange-400 hover:shadow-[0_0_20px_rgba(249,115,22,0.25)]
+           active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-outline {
+    @apply border border-[#3a3a3a] text-gray-300 font-medium rounded-full px-5 py-2
+           transition-all duration-200 hover:border-lime-400/50 hover:text-lime-400
+           active:scale-95;
+  }
+
+  .dark-input {
+    @apply w-full bg-[#111111] border border-[#2a2a2a] rounded-xl px-4 py-3 text-white
+           placeholder-gray-600 outline-none transition-all duration-300
+           focus:border-lime-400/50 focus:ring-1 focus:ring-lime-400/20;
+  }
+
+  .dark-select {
+    @apply w-full bg-[#111111] border border-[#2a2a2a] rounded-xl px-4 py-3 text-white
+           outline-none transition-all duration-300 appearance-none cursor-pointer
+           focus:border-lime-400/50 focus:ring-1 focus:ring-lime-400/20;
+  }
+
+  .dark-select option {
+    @apply bg-[#161616] text-white;
+  }
+
+  .pill-tab {
+    @apply px-4 py-2 text-sm rounded-full border border-[#2a2a2a] text-gray-400
+           transition-all duration-200 hover:border-[#3a3a3a] hover:text-gray-300;
+  }
+
+  .pill-tab-active {
+    @apply px-4 py-2 text-sm rounded-full bg-lime-400 text-black font-medium
+           border border-lime-400 transition-all duration-200;
+  }
+}
+
+/* Date picker dark theme */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  cursor: pointer;
+}
+
+/* Card hover glow */
+.card-dark:hover {
+  box-shadow: 0 0 20px rgba(163, 230, 53, 0.03), 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Background grid pattern */
+.bg-grid-pattern {
+  background-image: radial-gradient(circle, #1a1a1a 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+.bg-grid-pattern::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 0%, rgba(163, 230, 53, 0.03) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Calendar */
+.calendar-cell {
+  @apply bg-[#111111] border border-[#1e1e1e] rounded-lg p-1.5 min-h-[80px]
+         transition-all duration-200 hover:border-[#2a2a2a] cursor-pointer;
+}
+
+.calendar-cell-today {
+  @apply border-lime-400/40;
+}
+
+.calendar-cell-outside {
+  @apply opacity-30;
+}
