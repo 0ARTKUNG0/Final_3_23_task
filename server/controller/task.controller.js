@@ -25,7 +25,11 @@ const createTask = async (req, res) => {
 
 const getTasks = async (req, res) => {
     try {
-        const filter = { user: req.user._id };
+        const filter = {};
+        // If ?mine=true, show only the logged-in user's tasks
+        if (req.query.mine === "true") {
+            filter.user = req.user._id;
+        }
         if (req.query.status) {
             filter.status = req.query.status;
         }
@@ -37,7 +41,7 @@ const getTasks = async (req, res) => {
             if (req.query.dueDateFrom) filter.dueDate.$gte = new Date(req.query.dueDateFrom);
             if (req.query.dueDateTo) filter.dueDate.$lte = new Date(req.query.dueDateTo);
         }
-        const tasks = await Task.find(filter).sort({ createdAt: -1 });
+        const tasks = await Task.find(filter).populate("user", "fullName profilePic").sort({ createdAt: -1 });
         res.status(200).json({ tasks });
     } catch (error) {
         console.log(error);
@@ -50,12 +54,9 @@ const getTaskById = async (req, res) => {
         if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
             return res.status(400).json({ message: "Invalid task ID" });
         }
-        const task = await Task.findById(req.params.id);
+        const task = await Task.findById(req.params.id).populate("user", "fullName profilePic");
         if (!task) {
             return res.status(404).json({ message: "Task not found" });
-        }
-        if (task.user.toString() !== req.user._id.toString()) {
-            return res.status(403).json({ message: "Unauthorized access" });
         }
         res.status(200).json({ task });
     } catch (error) {

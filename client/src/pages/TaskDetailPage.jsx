@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { ArrowLeft, Pencil, Trash2, Calendar, Clock, AlertTriangle, CheckCircle2, Circle, PlayCircle, CalendarDays } from "lucide-react";
 import axiosInstance from "../services/axios";
 import useTaskStore from "../store/useTaskStore";
+import useAuthStore from "../store/useAuthStore";
 import TaskForm from "../components/TaskForm";
 import PageTransition from "../components/PageTransition";
 import toast from "react-hot-toast";
@@ -38,6 +39,7 @@ export default function TaskDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { deleteTask } = useTaskStore();
+  const { authUser } = useAuthStore();
   const [task, setTask] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -91,6 +93,7 @@ export default function TaskDetailPage() {
   const StatusIcon = status.icon;
   const currentStep = status.step;
 
+  const isOwner = authUser?._id === (task.user?._id || task.user);
   const isOverdue = task.dueDate && task.status !== "done" && new Date(task.dueDate) < new Date();
 
   return (
@@ -110,22 +113,24 @@ export default function TaskDetailPage() {
           <div className={`card-dark-strong p-8 ${isOverdue ? "border-red-500/40 shadow-[0_0_20px_rgba(239,68,68,0.15)]" : ""}`}>
             <div className="flex items-start justify-between gap-4 mb-6">
               <h1 className="text-2xl font-bold text-white">{task.title}</h1>
-              <div className="flex gap-2 shrink-0">
-                <button
-                  onClick={() => setIsFormOpen(true)}
-                  className="p-2 rounded-lg text-gray-500 hover:text-lime-400 hover:bg-[#1e1e1e] transition-all"
-                  title="Edit"
-                >
-                  <Pencil size={18} />
-                </button>
-                <button
-                  onClick={handleDelete}
-                  className="p-2 rounded-lg text-gray-500 hover:text-orange-400 hover:bg-[#1e1e1e] transition-all"
-                  title="Delete"
-                >
-                  <Trash2 size={18} />
-                </button>
-              </div>
+              {isOwner && (
+                <div className="flex gap-2 shrink-0">
+                  <button
+                    onClick={() => setIsFormOpen(true)}
+                    className="p-2 rounded-lg text-gray-500 hover:text-lime-400 hover:bg-[#1e1e1e] transition-all"
+                    title="Edit"
+                  >
+                    <Pencil size={18} />
+                  </button>
+                  <button
+                    onClick={handleDelete}
+                    className="p-2 rounded-lg text-gray-500 hover:text-orange-400 hover:bg-[#1e1e1e] transition-all"
+                    title="Delete"
+                  >
+                    <Trash2 size={18} />
+                  </button>
+                </div>
+              )}
             </div>
 
             {task.description && (
@@ -153,6 +158,16 @@ export default function TaskDetailPage() {
                 </span>
               )}
             </div>
+
+            {/* Owner */}
+            {task.user?.fullName && (
+              <div className="flex items-center gap-3 mb-6 text-sm text-gray-500">
+                {task.user.profilePic && (
+                  <img src={task.user.profilePic} alt="" className="w-6 h-6 rounded-full object-cover" />
+                )}
+                <span>Created by <span className="text-gray-300">{task.user.fullName}</span></span>
+              </div>
+            )}
 
             {/* Dates Section */}
             {(task.startDate || task.dueDate) && (

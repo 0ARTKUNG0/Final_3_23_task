@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Pencil, Trash2, Clock, AlertTriangle, CheckCircle2, Circle, CalendarDays, ArrowRightCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import useTaskStore from "../store/useTaskStore";
+import useAuthStore from "../store/useAuthStore";
 
 const statusConfig = {
   todo: { label: "Todo", color: "text-lime-400 bg-lime-400/10 border-lime-400/30", icon: Circle },
@@ -23,6 +24,8 @@ const fmtDate = (d) =>
 
 export default function TaskCard({ task, onEdit, onDelete, index = 0 }) {
   const { updateTask } = useTaskStore();
+  const { authUser } = useAuthStore();
+  const isOwner = authUser?._id === (task.user?._id || task.user);
   const status = statusConfig[task.status] || statusConfig.todo;
   const priority = priorityConfig[task.priority] || priorityConfig.medium;
   const StatusIcon = status.icon;
@@ -58,22 +61,24 @@ export default function TaskCard({ task, onEdit, onDelete, index = 0 }) {
         >
           {task.title}
         </Link>
-        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-          <button
-            onClick={() => onEdit(task)}
-            className="p-1.5 rounded-lg text-gray-500 hover:text-lime-400 hover:bg-[#1e1e1e] transition-all"
-            title="Edit"
-          >
-            <Pencil size={15} />
-          </button>
-          <button
-            onClick={() => onDelete(task._id)}
-            className="p-1.5 rounded-lg text-gray-500 hover:text-orange-400 hover:bg-[#1e1e1e] transition-all"
-            title="Delete"
-          >
-            <Trash2 size={15} />
-          </button>
-        </div>
+        {isOwner && (
+          <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+            <button
+              onClick={() => onEdit(task)}
+              className="p-1.5 rounded-lg text-gray-500 hover:text-lime-400 hover:bg-[#1e1e1e] transition-all"
+              title="Edit"
+            >
+              <Pencil size={15} />
+            </button>
+            <button
+              onClick={() => onDelete(task._id)}
+              className="p-1.5 rounded-lg text-gray-500 hover:text-orange-400 hover:bg-[#1e1e1e] transition-all"
+              title="Delete"
+            >
+              <Trash2 size={15} />
+            </button>
+          </div>
+        )}
       </div>
 
       {task.description && (
@@ -81,21 +86,35 @@ export default function TaskCard({ task, onEdit, onDelete, index = 0 }) {
       )}
 
       <div className="flex items-center gap-2 flex-wrap">
-        {/* Clickable status badge — cycles to next status */}
-        <button
-          onClick={handleStatusChange}
-          className={`inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full border cursor-pointer transition-all hover:brightness-125 ${status.color}`}
-          title={`Move to ${nextConfig.label}`}
-        >
-          <StatusIcon size={12} />
-          {status.label}
-          <ArrowRightCircle size={10} className="opacity-50 ml-0.5" />
-        </button>
+        {/* Clickable status badge — only owner can cycle status */}
+        {isOwner ? (
+          <button
+            onClick={handleStatusChange}
+            className={`inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full border cursor-pointer transition-all hover:brightness-125 ${status.color}`}
+            title={`Move to ${nextConfig.label}`}
+          >
+            <StatusIcon size={12} />
+            {status.label}
+            <ArrowRightCircle size={10} className="opacity-50 ml-0.5" />
+          </button>
+        ) : (
+          <span className={`inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full border ${status.color}`}>
+            <StatusIcon size={12} />
+            {status.label}
+          </span>
+        )}
         <span className={`inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full border ${priority.color}`}>
           <AlertTriangle size={12} />
           {priority.label}
         </span>
       </div>
+
+      {/* Owner name */}
+      {task.user?.fullName && (
+        <p className="text-xs text-gray-600 mt-2">
+          by <span className="text-gray-400">{task.user.fullName}</span>
+        </p>
+      )}
 
       {(task.startDate || task.dueDate) && (
         <div className="flex items-center gap-3 mt-3 text-xs text-gray-500">
